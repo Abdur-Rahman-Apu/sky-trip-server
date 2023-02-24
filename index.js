@@ -25,10 +25,20 @@ async function run() {
 
 
     const { MongoClient, ServerApiVersion } = require('mongodb');
-    const uri = `mongodb+srv://${process.env.DB_USER}:${DB_PASSWORD}@cluster0.7kbtzra.mongodb.net/?retryWrites=true&w=majority`;
+    const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.7kbtzra.mongodb.net/?retryWrites=true&w=majority`;
+
     const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 
+    const usersCollection = client.db('skyTrip').collection('users')
+
+
+    app.post('/users', async (req, res) => {
+        const userInfo = req.body;
+        console.log(userInfo);
+        const result = await usersCollection.insertOne(userInfo)
+        res.send(result)
+    })
 
 }
 
