@@ -32,11 +32,18 @@ async function run() {
 
     const usersCollection = client.db('skyTrip').collection('users')
 
-
+    // users 
     app.post('/users', async (req, res) => {
         const userInfo = req.body;
         console.log(userInfo);
         const result = await usersCollection.insertOne(userInfo)
+        res.send(result)
+    })
+
+    app.get('/user', async (req, res) => {
+        const email = req.query.email;
+        const result = await usersCollection.findOne({ email: email })
+
         res.send(result)
     })
 
