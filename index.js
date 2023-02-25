@@ -47,6 +47,21 @@ async function run() {
         res.send(result)
     })
 
+    app.get('/users', async (req, res) => {
+
+        const cursor = usersCollection.find({})
+        const allUsers = await cursor.toArray()
+
+        const company = allUsers.filter(user => user?.identity === 'Company')
+        const user = allUsers.filter(user => user?.identity === 'User')
+
+
+        res.send({
+            company,
+            user
+        })
+    })
+
 }
 
 run().catch(error => {
