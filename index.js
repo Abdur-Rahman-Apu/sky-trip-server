@@ -12,6 +12,8 @@ require('dotenv').config()
 
 const port = process.env.PORT || 5000
 
+var jwt = require('jsonwebtoken');
+
 app.get('/', async (req, res) => {
     res.send("Server is running")
 })
@@ -19,6 +21,25 @@ app.get('/', async (req, res) => {
 app.listen(port, async () => {
     console.log("Server is running on port", port);
 })
+
+
+function verifyJWT(req, res, next) {
+    const authHeader = req.header.authorization
+    if (!authHeader) {
+        return res.status(401).send({ "message": "Unauthorized access" })
+    }
+
+    const token = authHeader.split('')[1]
+
+    wt.verify(token, process.env.ACCESS_TOKEN, function (err, decoded) {
+        if (err) {
+            return res.status(401).send({ "message": "Unauthorized access" })
+        }
+
+        req.decoded = decoded
+        next()
+    });
+}
 
 async function run() {
 
@@ -67,6 +88,21 @@ async function run() {
         console.log(id);
         const result = await usersCollection.deleteOne({ _id: new ObjectId(id) })
         res.send(result)
+    })
+
+
+    //jwt
+
+    app.post('/jwt', async (req, res) => {
+
+
+        const email = req.body;
+
+        console.log(email);
+
+        var token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN, { expiresIn: '24h' });
+
+        res.send({ token })
     })
 
 }
