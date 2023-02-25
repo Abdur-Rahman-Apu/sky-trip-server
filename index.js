@@ -24,7 +24,7 @@ async function run() {
 
 
 
-    const { MongoClient, ServerApiVersion } = require('mongodb');
+    const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
     const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.7kbtzra.mongodb.net/?retryWrites=true&w=majority`;
 
     const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
@@ -35,7 +35,6 @@ async function run() {
     // users 
     app.post('/users', async (req, res) => {
         const userInfo = req.body;
-        console.log(userInfo);
         const result = await usersCollection.insertOne(userInfo)
         res.send(result)
     })
@@ -60,6 +59,14 @@ async function run() {
             company,
             user
         })
+    })
+
+    //delete user
+    app.delete('/deleteUser/:id', async (req, res) => {
+        const id = req.params.id
+        console.log(id);
+        const result = await usersCollection.deleteOne({ _id: new ObjectId(id) })
+        res.send(result)
     })
 
 }
