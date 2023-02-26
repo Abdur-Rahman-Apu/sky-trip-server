@@ -14,6 +14,8 @@ const port = process.env.PORT || 5000
 
 var jwt = require('jsonwebtoken');
 
+const stripe = require("stripe")(`${process.env.STRIPE_SK}`);
+
 app.get('/', async (req, res) => {
     res.send("Server is running")
 })
@@ -52,6 +54,7 @@ async function run() {
     const usersCollection = client.db('skyTrip').collection('users')
     const flightCollection = client.db('skyTrip').collection('flights')
     const bookCollection = client.db('skyTrip').collection('book')
+    const paidCollection = client.db('skyTrip').collection('paid')
 
     // users 
     app.post('/users', async (req, res) => {
@@ -172,9 +175,17 @@ async function run() {
     //get specific flight info 
     app.get('/flight/:id', async (req, res) => {
         const id = req.params.id;
-
+        console.log("Flight", id);
         const findFlight = await flightCollection.findOne({ _id: new ObjectId(id) })
         res.send(findFlight)
+    })
+
+    // get booked specific item
+    app.get('/book/:id', async (req, res) => {
+        const bookId = req.params.id;
+        console.log("bookid", bookId);
+        const findBook = await bookCollection.findOne({ _id: new ObjectId(bookId) })
+        res.send(findBook)
     })
 
     //delete from cart
@@ -202,6 +213,41 @@ async function run() {
         const deleteBook = await bookCollection.deleteOne({ _id: new ObjectId(bookId) })
 
         res.send(deleteBook)
+    })
+
+
+    //payment intent
+    app.post("/create-payment-intent", async (req, res) => {
+        const { price } = req.body;
+        console.log("price", price);
+
+        if (price) {
+            const amount = price * 100;
+            // Create a PaymentIntent with the order amount and currency
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: "usd",
+                "payment_method_types": [
+                    "card"
+                ],
+            });
+
+            res.send({
+                clientSecret: paymentIntent.client_secret,
+            });
+        }
+    });
+
+
+    //store paid info
+    app.post('/paid', async (req, res) => {
+        const paymentInfo = req.body;
+        const result = await paidCollection.insertOne(paymentInfo)
+
+        console.log(paymentInfo);
+
+        const findBook = await bookCollection.deleteOne({ _id: new ObjectId(paymentInfo?.flightInfo?._id) })
+        res.send(result)
     })
 }
 
