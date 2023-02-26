@@ -249,6 +249,15 @@ async function run() {
         const findBook = await bookCollection.deleteOne({ _id: new ObjectId(paymentInfo?.flightInfo?._id) })
         res.send(result)
     })
+
+    //specific user paid flight
+    app.get('/specificPaidFlight', async (req, res) => {
+        const email = req.query.email
+
+        const cursor = paidCollection.find({ buyerEmail: email })
+        const result = await cursor.toArray()
+        res.send(result)
+    })
 }
 
 run().catch(error => {
