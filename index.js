@@ -111,6 +111,24 @@ async function run() {
         res.send(result)
     })
 
+    //getAllFlight
+    app.get('/showAllFlight', async (req, res) => {
+
+        const email = req.query.email;
+        const cursor = flightCollection.find({ companyEmail: email })
+        const result = await cursor.toArray()
+        res.send(result)
+    })
+
+    // delete flight 
+
+    app.delete('/deleteFlight/:id', async (req, res) => {
+        const id = req.params.id;
+
+        const result = await flightCollection.deleteOne({ _id: new ObjectId(id) })
+
+        res.send(result)
+    })
 }
 
 run().catch(error => {
