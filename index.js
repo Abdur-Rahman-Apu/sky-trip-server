@@ -111,7 +111,7 @@ async function run() {
         res.send(result)
     })
 
-    //getAllFlight
+    //getSpecificCompanyFlight
     app.get('/showAllFlight', async (req, res) => {
 
         const email = req.query.email;
@@ -127,6 +127,13 @@ async function run() {
 
         const result = await flightCollection.deleteOne({ _id: new ObjectId(id) })
 
+        res.send(result)
+    })
+
+    //getAllFlight
+    app.get('/allFlight', async (req, res) => {
+        const cursor = flightCollection.find({})
+        const result = await cursor.toArray()
         res.send(result)
     })
 }
