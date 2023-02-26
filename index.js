@@ -158,6 +158,51 @@ async function run() {
 
         res.send(result)
     })
+
+
+
+    //get specific user booked items
+    app.get('/booked', async (req, res) => {
+        const email = req.query.email;
+        const cursor = bookCollection.find({ buyerEmail: email })
+        const result = await cursor.toArray()
+        res.send(result)
+    })
+
+    //get specific flight info 
+    app.get('/flight/:id', async (req, res) => {
+        const id = req.params.id;
+
+        const findFlight = await flightCollection.findOne({ _id: new ObjectId(id) })
+        res.send(findFlight)
+    })
+
+    //delete from cart
+    app.delete('/deleteFromCart', async (req, res) => {
+        const bookId = req.query.bookId
+        const flightId = req.query.flightId
+
+        const bookItem = await bookCollection.findOne({ _id: new ObjectId(bookId) })
+        const bookSeat = parseInt(bookItem.seat);
+
+        const flightItem = await flightCollection.findOne({ _id: new ObjectId(flightId) })
+
+        const flightSeat = parseInt(flightItem.seats)
+
+        const amountOfSeat = flightSeat + bookSeat
+
+        const updateSeat = {
+            $set: {
+                seats: amountOfSeat
+            }
+        }
+
+        const updateFlightInfo = await flightCollection.updateOne({ _id: new ObjectId(flightId) }, updateSeat)
+
+        const deleteBook = await bookCollection.deleteOne({ _id: new ObjectId(bookId) })
+
+        res.send(deleteBook)
+    })
 }
 
 run().catch(error => {
