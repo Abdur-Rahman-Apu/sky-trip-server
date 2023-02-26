@@ -37,13 +37,11 @@ function verifyJWT(req, res, next) {
         }
 
         req.decoded = decoded
-        next()
+        next();
     });
 }
 
 async function run() {
-
-
 
     const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
     const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.7kbtzra.mongodb.net/?retryWrites=true&w=majority`;
@@ -52,6 +50,7 @@ async function run() {
 
 
     const usersCollection = client.db('skyTrip').collection('users')
+    const flightCollection = client.db('skyTrip').collection('flights')
 
     // users 
     app.post('/users', async (req, res) => {
@@ -103,6 +102,13 @@ async function run() {
         var token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN, { expiresIn: '24h' });
 
         res.send({ token })
+    })
+
+    //addFlight
+    app.post('/addFlight', async (req, res) => {
+        const flightInfo = req.body;
+        const result = await flightCollection.insertOne(flightInfo)
+        res.send(result)
     })
 
 }
