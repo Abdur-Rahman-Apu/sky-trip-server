@@ -51,6 +51,7 @@ async function run() {
 
     const usersCollection = client.db('skyTrip').collection('users')
     const flightCollection = client.db('skyTrip').collection('flights')
+    const bookCollection = client.db('skyTrip').collection('book')
 
     // users 
     app.post('/users', async (req, res) => {
@@ -134,6 +135,27 @@ async function run() {
     app.get('/allFlight', async (req, res) => {
         const cursor = flightCollection.find({})
         const result = await cursor.toArray()
+        res.send(result)
+    })
+
+    //book flight
+    app.post('/bookFlight', async (req, res) => {
+        const flightInfo = req.body;
+        const result = await bookCollection.insertOne(flightInfo)
+
+        const findFlight = await flightCollection.findOne({ _id: new ObjectId(flightInfo?.flightId) })
+
+        const availableSeat = parseInt(findFlight?.seats) - parseInt(flightInfo?.seat)
+
+        console.log(availableSeat);
+        const updateDoc = {
+            $set: {
+                seats: availableSeat
+            }
+        }
+
+        const updateFlight = await flightCollection.updateOne({ _id: new ObjectId(flightInfo?.flightId) }, updateDoc)
+
         res.send(result)
     })
 }
