@@ -253,9 +253,10 @@ async function run() {
     //specific user paid flight
     app.get('/specificPaidFlight', async (req, res) => {
         const email = req.query.email
-
+        console.log("specific", email);
         const cursor = paidCollection.find({ buyerEmail: email })
         const result = await cursor.toArray()
+        console.log("specific", result);
         res.send(result)
     })
 
@@ -278,6 +279,20 @@ async function run() {
         const result = await cursor.toArray()
 
         res.send(result)
+    })
+
+    //search flight
+
+    app.get('/searchFlight', async (req, res) => {
+        const search = req.query.search;
+        console.log("search", search);
+
+        const cursor = flightCollection.find({})
+        const result = await cursor.toArray()
+
+        console.log("result", result);
+        const get = result.filter(item => item?.from.toUpperCase() == search.toUpperCase() || item?.destination.toUpperCase() == search.toUpperCase())
+        res.send(get)
     })
 }
 
