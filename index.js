@@ -66,7 +66,6 @@ async function run() {
     app.get('/user', async (req, res) => {
         const email = req.query.email;
         const result = await usersCollection.findOne({ email: email })
-
         res.send(result)
     })
 
@@ -88,7 +87,6 @@ async function run() {
     //delete user
     app.delete('/deleteUser/:id', async (req, res) => {
         const id = req.params.id
-        console.log(id);
         const result = await usersCollection.deleteOne({ _id: new ObjectId(id) })
         res.send(result)
     })
@@ -98,13 +96,8 @@ async function run() {
 
     app.post('/jwt', async (req, res) => {
 
-
         const email = req.body;
-
-        console.log(email);
-
         var token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN, { expiresIn: '24h' });
-
         res.send({ token })
     })
 
@@ -150,7 +143,6 @@ async function run() {
 
         const availableSeat = parseInt(findFlight?.seats) - parseInt(flightInfo?.seat)
 
-        console.log(availableSeat);
         const updateDoc = {
             $set: {
                 seats: availableSeat
@@ -175,7 +167,6 @@ async function run() {
     //get specific flight info 
     app.get('/flight/:id', async (req, res) => {
         const id = req.params.id;
-        console.log("Flight", id);
         const findFlight = await flightCollection.findOne({ _id: new ObjectId(id) })
         res.send(findFlight)
     })
@@ -183,7 +174,6 @@ async function run() {
     // get booked specific item
     app.get('/book/:id', async (req, res) => {
         const bookId = req.params.id;
-        console.log("bookid", bookId);
         const findBook = await bookCollection.findOne({ _id: new ObjectId(bookId) })
         res.send(findBook)
     })
@@ -219,7 +209,6 @@ async function run() {
     //payment intent
     app.post("/create-payment-intent", async (req, res) => {
         const { price } = req.body;
-        console.log("price", price);
 
         if (price) {
             const amount = price * 100;
@@ -244,8 +233,6 @@ async function run() {
         const paymentInfo = req.body;
         const result = await paidCollection.insertOne(paymentInfo)
 
-        console.log("paymentInfo", paymentInfo);
-
         const findBook = await bookCollection.deleteOne({ _id: new ObjectId(paymentInfo?.bookInfo?._id) })
         res.send(result)
     })
@@ -253,10 +240,8 @@ async function run() {
     //specific user paid flight
     app.get('/specificPaidFlight', async (req, res) => {
         const email = req.query.email
-        console.log("specific", email);
         const cursor = paidCollection.find({ buyerEmail: email })
         const result = await cursor.toArray()
-        console.log("specific", result);
         res.send(result)
     })
 
@@ -266,13 +251,9 @@ async function run() {
 
     app.get('/companyPaidInfo', async (req, res) => {
         const email = req.query.email
-
-
         const query = {
             'flightInfo.companyEmail': email
         }
-
-        console.log(query);
 
         const cursor = paidCollection.find(query)
 
@@ -285,14 +266,16 @@ async function run() {
 
     app.get('/searchFlight', async (req, res) => {
         const search = req.query.search;
-        console.log("search", search);
 
         const cursor = flightCollection.find({})
         const result = await cursor.toArray()
 
-        console.log("result", result);
-        const get = result.filter(item => item?.from.toUpperCase() == search.toUpperCase() || item?.destination.toUpperCase() == search.toUpperCase())
-        res.send(get)
+        if (search) {
+            const get = result.filter(item => item?.from.toUpperCase() == search.toUpperCase() || item?.destination.toUpperCase() == search.toUpperCase())
+            res.send(get)
+        } else {
+            res.send(result)
+        }
     })
 }
 
