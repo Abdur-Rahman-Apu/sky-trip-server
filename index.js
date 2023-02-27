@@ -244,9 +244,9 @@ async function run() {
         const paymentInfo = req.body;
         const result = await paidCollection.insertOne(paymentInfo)
 
-        console.log(paymentInfo);
+        console.log("paymentInfo", paymentInfo);
 
-        const findBook = await bookCollection.deleteOne({ _id: new ObjectId(paymentInfo?.flightInfo?._id) })
+        const findBook = await bookCollection.deleteOne({ _id: new ObjectId(paymentInfo?.bookInfo?._id) })
         res.send(result)
     })
 
@@ -258,7 +258,30 @@ async function run() {
         const result = await cursor.toArray()
         res.send(result)
     })
+
+
+
+    // specific company paid info
+
+    app.get('/companyPaidInfo', async (req, res) => {
+        const email = req.query.email
+
+
+        const query = {
+            'flightInfo.companyEmail': email
+        }
+
+        console.log(query);
+
+        const cursor = paidCollection.find(query)
+
+        const result = await cursor.toArray()
+
+        res.send(result)
+    })
 }
+
+
 
 run().catch(error => {
     console.log(error);
